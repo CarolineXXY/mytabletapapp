@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}TableTap's Homepage{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-lg-6">
+                {% if user.is_authenticated %}
+                    <h1 class="display-1 fw-semibold title">Welcome {{ user.username }}</h1>
+                {% else %}
+                    <h1 class="display-1 fw-semibold title">Welcome to TableTap</h1>
+                {% endif %}
+                <p class="lead my-3">Empowering restaurants, cafés, and coffee shops to streamline service with digital menus and instant table-side ordering.</p>
+                {% if user.is_authenticated%}
+                    <a href="{% url 'manage_menu' %}" class="btn btn-primary btn-lg mb-4 mb-lg-0">Manage Menu</a>
+                {% else %}
+                    <a href="{% url 'account_login' %}?next={% url 'manage_menu' %}" class="btn btn-primary btn-lg mb-4 mb-lg-0">Login to Manage Menu</a>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'tabletapapp/images/banner.jpg' %}" alt="TableTap Banner"
+                    class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <h1 class="fw-medium text-center mb-5 title">Why TableTap?</h1>
+        <div class="row">
+            <div class="col-lg-4 mb-4 d-flex align-items-stretch">
+                <div class="card p-3">
+                    <img src="{% static 'tabletapapp/images/banner.jpg' %}" class="img-fluid card-img-middle" alt="...">
+                    <div class="card-body">
+                        <h4 class="card-title">Easy Menu Upload</h4>
+                        <p class="card-text">Create and manage your restaurant's digital menu with ease. Upload items, set categories, and make real-time updates — no need to reprint anything. Keep your offerings fresh and flexible.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4 d-flex align-items-stretch">
+                <div class="card p-3">
+                    <img src="{% static 'tabletapapp/images/banner.jpg' %}" class="img-fluid card-img-middle" alt="...">
+                    <div class="card-body">
+                        <h4 class="card-title">QR Code for Every Table</h4>
+                        <p class="card-text">Generate unique QR codes for each table with just a click. Diners scan the code to instantly access your menu and start ordering. It's fast, contactless, and personalized to their table.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4 d-flex align-items-stretch">
+                <div class="card p-3">
+                    <img src="{% static 'tabletapapp/images/banner.jpg' %}" class="img-fluid card-img-middle" alt="...">
+                    <div class="card-body">
+                        <h4 class="card-title">Smart Order Management</h4>
+                        <p class="card-text">Manage all incoming orders in real-time with a clear, organised dashboard. Track pending and completed orders with a single tap, helping your staff stay efficient and responsive.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

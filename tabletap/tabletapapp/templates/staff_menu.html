@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }}'s Menu{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-medium title mb-5">{{ restaurant.name }} Menu</h2>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-4 col-lg-2">
+                <div id="list-example" class="list-group position-sticky" style="top: 60px;">
+                    {% for category, items in items_by_category.items %}
+                    {% if items %}
+                    <a class="list-group-item list-group-item-action fw-medium" href="#category-{{ category.id }}">{{ category.name }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-8 col-lg-10">
+                <div data-bs-spy="scroll" data-bs-target="#list-example" data-bs-smooth-scroll="true"
+                    class="scrollspy-example" tabindex="0">
+                    {% for category, items in items_by_category.items %}
+                    {% if items %}
+                    <h4 class="text-center mb-4" id="category-{{ category.id }}">{{ category.name }}</h4>
+                    <div class="row">
+                        {% for dish in items %}
+                        <div class="col-lg-3 col-md-6 mb-4 d-flex align-items-stretch">
+                            <div class="card p-3">
+                                {% if dish.image %}
+                                <img src="{{ dish.image.url }}" class="img-fluid menu-card-image card-img-middle" alt="{{ dish.name }}">
+                                {% else %}
+                                <img src="{% static 'default_dish.png' %}" class="img-fluid menu-card-image card-img-middle"
+                                    alt="No image">
+                                {% endif %}
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ dish.name }}</h5>
+                                    <p class="card-text">${{ dish.price }}</p>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                            onclick="decreaseQuantity(this)">-</button>
+                                        <input type="text" class="form-control text-center mx-2" value="0"
+                                            style="width: 50px;" readonly>
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                            onclick="increaseQuantity(this)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function increaseQuantity(btn) {
+        const input = btn.previousElementSibling;
+        input.value = parseInt(input.value) + 1;
+    }
+
+    function decreaseQuantity(btn) {
+        const input = btn.nextElementSibling;
+        if (parseInt(input.value) > 0) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+</script>
+
+{% endblock %}

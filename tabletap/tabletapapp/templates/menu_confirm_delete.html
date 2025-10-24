@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <h2>Delete Menu Item</h2>
+    {% if object.image %}
+    <img src="{{ object.image.url }}" class="img-fluid menu-image rounded mb-3" alt="{{ object.name }}">
+    {% endif %}
+    <p>Are you sure you want to delete "<strong>{{ object.name }}</strong>"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'manage_menu' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% load socialaccount %} 
+
+{% block title %}TableTap Signup{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <h2 class="text-center subtitle mb-5">Sign Up</h2>
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+        
+                <div class="form-floating mb-4">
+                  <input type="text" name="username" class="form-control" id="floatingUsername" placeholder="Username" value="{{ form.username.value|default_if_none:'' }}">
+                  <label for="floatingUsername">Username</label>
+                  {% for error in form.username.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                  {% endfor %}
+                </div>
+        
+                <div class="form-floating mb-4">
+                  <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="Email" value="{{ form.email.value|default_if_none:'' }}">
+                  <label for="floatingEmail">Email</label>
+                  {% for error in form.email.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                  {% endfor %}
+                </div>
+        
+                <div class="form-floating mb-4">
+                  <input type="password" name="password1" class="form-control" id="floatingPassword1" placeholder="Password">
+                  <label for="floatingPassword1">Password</label>
+                  {% for error in form.password1.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                  {% endfor %}
+                </div>
+        
+                <div class="form-floating mb-4">
+                  <input type="password" name="password2" class="form-control" id="floatingPassword2" placeholder="Confirm Password">
+                  <label for="floatingPassword2">Confirm Password</label>
+                  {% for error in form.password2.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                  {% endfor %}
+                </div>
+        
+                <div class="d-grid gap-3 mx-auto mb-3">
+                  <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary py-2">
+                    <i class="bi bi-google"></i> Sign up with Google
+                  </a>
+                </div>
+        
+                <div class="d-grid gap-3 mx-auto">
+                  <button type="submit" class="btn btn-primary py-2">Sign Up</button>
+                  <p class="mb-0">Already have an account? <a href="{% url 'account_login' %}" style="color: #e0a93d;">Log in here</a></p>
+                </div>
+              </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Your Order{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="d-flex justify-content-center">
+        <div class="shopping-cart col-lg-6 col-8 text-center" >
+            <h2 class="display-5 fw-medium title mb-4">Order Summary</h2>
+            <div class="my-4">
+                <p class="mb-3"><strong>Table Number:</strong> {{ order.table.table_num }}</p>
+                <p><strong>Order Time:</strong> {{ order.order_time|date:"d M Y H:i" }}</p>
+            </div>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% for item in order_items %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ item.item.name }} <strong>x {{ item.quantity }}</strong></span>
+                            <span>${{ item.subtotal }}</span>
+                        </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold mb-2">
+                        <span>Total:</span>
+                        <span>${{ order.cost }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'menu' %}?restaurant={{ order.restaurant.id }}&table={{ order.table.table_num }}" class="btn btn-primary">
+                    Back to Menu
+                </a>
+            </div>
+        </div>
+    </div>
+    
+</section>
+{% endblock %}

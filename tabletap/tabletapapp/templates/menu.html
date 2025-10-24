@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }}'s Menu{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-medium title mb-4">{{ restaurant.name }} Menu</h2>
+        </div>
+
+        <div class="mb-5 text-center">
+            <label class="form-label fw-medium mx-1">Table Number: {{ table_number }}</label>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-4 col-lg-2">
+                <div id="list-example" class="list-group position-sticky" style="top: 60px;">
+                    {% for category, items in items_by_category.items %}
+                    {% if items %}
+                    <a class="list-group-item list-group-item-action fw-medium" href="#category-{{ category.id }}">{{ category.name }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-8 col-lg-10">
+                <div data-bs-spy="scroll" data-bs-target="#list-example" data-bs-smooth-scroll="true"
+                    class="scrollspy-example" tabindex="0">
+                    {% for category, items in items_by_category.items %}
+                    {% if items %}
+                    <h4 class="text-center mb-4 subtitle" id="category-{{ category.id }}">{{ category.name }}</h4>
+                    <div class="row">
+                        {% for dish in items %}
+                        <div class="col-lg-3 col-md-6 mb-4 d-flex align-items-stretch">
+                            <div class="card p-3">
+                                {% if dish.image %}
+                                <img src="{{ dish.image.url }}" class="img-fluid menu-card-image card-img-middle" alt="{{ dish.name }}">
+                                {% else %}
+                                <img src="{% static 'default_dish.png' %}" class="img-fluid menu-card-image card-img-middle"
+                                    alt="No image">
+                                {% endif %}
+                                <div class="card-body text-center" data-id="{{ dish.id }}" data-name="{{ dish.name }}" data-price="{{ dish.price }}">
+                                    <h5 class="card-title">{{ dish.name }}</h5>
+                                    <p class="card-text">${{ dish.price }}</p>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="decreaseQuantity(this)">-</button>
+                                        <input type="text" class="form-control text-center mx-2" value="0" style="width: 50px;" readonly>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="increaseQuantity(this)">+</button>
+                                    </div>
+                                </div>                                
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="row mt-5">
+                    <div class="d-flex justify-content-center">
+                        <div class="shopping-cart col-lg-8 col-12">
+                            <h4 class="text-center subtitle mb-4">Your Order</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="cart-items">
+                                        <p class="text-center text-muted">Your cart is empty.</p>
+                                    </div>   
+                                    <hr>
+                                    <div class="d-flex justify-content-between fw-bold mb-2">
+                                        <span>Total:</span>
+                                        <span id="cart-total">$0.00</span>
+                                    </div>
+                                    <form id="checkout-form" class="text-center" method="POST" action="{% url 'submit_order' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
+                                        <input type="hidden" name="table_id" value="{{ table.id }}">
+                                        <input type="hidden" name="cart_data" id="cart-data">
+                                        <button type="submit" class="btn btn-primary w-50 mt-3" id="checkout-btn" disabled>Checkout</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const cart = {};
+
+    function updateCartDisplay() {
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartTotalDisplay = document.getElementById('cart-total');
+        const cartDataInput = document.getElementById('cart-data');
+        const checkoutBtn = document.getElementById('checkout-btn');
+
+        cartItemsContainer.innerHTML = '';
+
+        let total = 0;
+        const items = Object.values(cart);
+        if (items.length === 0) {
+            cartItemsContainer.innerHTML = '<p class="text-center text-muted">Your cart is empty.</p>';
+            checkoutBtn.disabled = true;
+        } else {
+            items.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.classList.add('d-flex', 'justify-content-between', 'mb-2');
+                itemEl.innerHTML = `<span>${item.name} <strong>x ${item.quantity}</strong></span><span>$${(item.price * item.quantity).toFixed(2)}</span>`;
+                cartItemsContainer.appendChild(itemEl);
+                total += item.price * item.quantity;
+            });
+
+            checkoutBtn.disabled = false;
+        }
+
+        cartTotalDisplay.textContent = `$${total.toFixed(2)}`;
+        cartDataInput.value = JSON.stringify(Object.values(cart));
+    }
+
+    function increaseQuantity(btn) {
+        const card = btn.closest('.card-body');
+        const input = btn.previousElementSibling;
+        const id = card.dataset.id;
+        const name = card.dataset.name;
+        const price = parseFloat(card.dataset.price);
+
+        input.value = parseInt(input.value) + 1;
+
+        if (!cart[id]) {
+            cart[id] = { id, name, price, quantity: 1 };
+        } else {
+            cart[id].quantity += 1;
+        }
+
+        updateCartDisplay();
+    }
+
+    function decreaseQuantity(btn) {
+        const card = btn.closest('.card-body');
+        const input = btn.nextElementSibling;
+        const id = card.dataset.id;
+
+        const current = parseInt(input.value);
+        if (current > 0) {
+            input.value = current - 1;
+            if (cart[id]) {
+                cart[id].quantity -= 1;
+                if (cart[id].quantity <= 0) {
+                    delete cart[id];
+                }
+            }
+        }
+
+        updateCartDisplay();
+    }
+</script>
+
+
+{% endblock %}

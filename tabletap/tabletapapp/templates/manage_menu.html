@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Menu{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container-fluid row">
+        <!-- Sidebar -->
+        <nav class="col-3 col-md-3 col-lg-2 sidebar d-flex flex-column">
+            <a href="#" class="nav-link active" onclick="showSection('info', event)">Restaurant Info</a>
+            <a href="#" class="nav-link" onclick="showSection('menu', event)">Manage Menu</a>
+            <a href="#" class="nav-link" onclick="showSection('orders', event)">Manage Orders</a>
+        </nav>
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 content">
+            <div id="info" class="section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="display-6 fw-medium title">Your Restaurant</h2>
+                </div>
+                {% if restaurant %}
+                <form method="post" action="" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-6">
+                        <label class="form-label">Restaurant Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ restaurant.name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Number of Tables</label>
+                        <input type="number" class="form-control" name="table_count" value="{{ restaurant.table_set.count }}">
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+                {% else %}
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="col-md-6">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        {{ form.name.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.table_count.label_tag }}
+                        {{ form.table_count }}
+                        {{ form.table_count.errors }}
+                    </div> 
+                    <div class="col-12 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+
+            <div id="menu" class="section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="title">Menu Management</h1>
+                </div>
+
+                {% if restaurant %}
+                <form method="get" class="row align-items-center g-2 mb-4">
+                    <div class="col-md-4 mb-3 mb-lg-0">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" placeholder="Enter your search..."
+                                value="{{ request.GET.search }}">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" id="qr-button" class="btn btn-primary" onclick="toggleQRCodes()">Generate QR Codes</button>
+                    </div>   
+                    <div class="col-md-4 text-md-end">
+                        <a href="{% url 'menu_add' %}" class="btn btn-primary">+ Add Menu Item</a>
+                   </div>
+                </form>
+                <table class="table table-striped mb-5">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in menu_items %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>
+                                {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-fluid menu-image rounded">
+                                {% else %}
+                                No image
+                                {% endif %}
+                            </td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.category }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>
+                                <a class="btn btn-sm btn-warning me-2 mb-1" href="{% url 'menu_edit' item.id %}">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <a class="btn btn-sm btn-danger mb-1" href="{% url 'menu_delete' item.id %}">
+                                    <i class="bi bi-dash-circle-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">No menu items found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if is_paginated %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link"
+                                href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ num }}">{{
+                                num }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+                <div id="qr-container" class="row mb-4 d-none">
+                    {% for table in restaurant.table_set.all %}
+                        <div class="col-6 col-md-3 text-center mb-4">
+                            <p>Table {{ table.table_num }}</p>
+                            {% if table.qr_code %}
+                                <img src="{{ table.qr_code.url }}" alt="QR Code for Table {{ table.table_num }}" class="img-fluid rounded border">
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                {% else %}
+                <div class="alert alert-danger mt-4 w-auto" role="alert">Please register your restaurant first!</div>
+                {% endif %} 
+            </div>
+
+            <div id="orders" class="section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="title">Order Management</h1>
+                </div>
+
+                <form method="get" class="row align-items-center g-2 mb-4">
+                    <div class="col-md-4 mb-3 mb-lg-0">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" placeholder="Enter your search..."
+                                value="{{ request.GET.search }}">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <table class="table table-striped mb-5">
+                    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Table Number</th>
+                            <th>Order Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.table.table_num }}</td>
+                            <td>{{ order.order_time|date:"d M Y H:i" }}</td>
+                            <td>
+                                <span class="badge {% if order.is_finished %}bg-success{% else %}bg-warning text-dark{% endif %}" id="order-status-{{ order.id }}">
+                                    {% if order.is_finished %}Finished
+                                    {% else %}Pending
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button
+                                    class="btn btn-sm {% if order.is_finished %}btn-success disabled{% else %}btn-secondary{% endif %} me-2 mb-1 finish-order-btn"
+                                    data-order-id="{{ order.id }}"
+                                    data-finish-url="{% url 'order_finish_ajax' order.id %}">
+                                    <i class="bi {% if order.is_finished %}bi-check-circle-fill{% else %}bi-check-circle{% endif %}"></i>
+                                </button>
+                                <a href="{% url 'order_delete' order.id %}" class="btn btn-sm btn-danger mb-1">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No orders found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if is_paginated %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link"
+                                href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ num }}">{{
+                                num }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function showSection(section, event = null) {
+        // Hide all sections
+        document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+        // Show the selected section
+        const targetSection = document.getElementById(section);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+        if (event) {
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        showSection('info'); 
+    });
+
+    function toggleQRCodes() {
+    const container = document.getElementById('qr-container');
+    const button = document.getElementById('qr-button');
+    const isHidden = container.classList.contains('d-none');
+    container.classList.toggle('d-none');
+    button.textContent = isHidden ? 'Hide QR Codes' : 'Show QR Codes';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".finish-order-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                const finishUrl = this.getAttribute("data-finish-url");
+                const orderId = this.getAttribute("data-order-id");
+                const csrfToken = document.getElementById("csrf-token").value;
+
+                fetch(finishUrl, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "finished") {
+                        this.classList.remove("btn-secondary");
+                        this.classList.add("btn-success");
+                        this.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                        this.disabled = true;
+
+                        const badge = document.getElementById(`order-status-${orderId}`);
+                        badge.classList.remove("bg-warning", "text-dark");
+                        badge.classList.add("bg-success");
+                        badge.innerText = "Finished";
+                    }
+                });
+            });
+        });
+    });
+
+</script>
+
+{% endblock %}

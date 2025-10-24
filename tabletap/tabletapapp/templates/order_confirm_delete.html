@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <h2>Delete Order</h2>
+    <p>Are you sure you want to delete Order #{{ object.id }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'manage_menu' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

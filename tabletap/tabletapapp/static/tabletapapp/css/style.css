@@ -1,0 +1,141 @@
+body {
+    background-color: #FFFCF7;
+    font-family: 'Poppins', sans-serif;
+}
+
+.bg-dark {
+    background-color: #e0a93d !important;
+}
+
+.bg-light {
+    background-color: #FFFCF7 !important;
+}
+
+.title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    color: #422D2B;
+}
+
+.subtitle {
+    font-family: 'Futura', sans-serif;
+    color: #422D2B;
+}
+
+.card {
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-family: 'Futura', sans-serif;
+}
+
+.card-text {
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-primary {
+    font-family: 'Futura', sans-serif;
+    background-color: #F3BC4E;
+    border: none;
+    color: #000;
+}
+
+.btn-primary:hover {
+    background-color: #e0a93d;
+}
+
+.btn-primary:disabled {
+    font-family: 'Futura', sans-serif;
+    background-color: #dfaa3f !important;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-outline-primary {
+    font-family: 'Futura', sans-serif;
+}
+
+#list-example .list-group-item {
+    height: 50px;
+    background-color: white;
+    border-left: 4px solid transparent;
+}
+
+#list-example .list-group-item:hover {
+    background-color: #fae9c6;
+    color: #422D2B;
+}
+
+#list-example .list-group-item.active {
+    color: white;
+    background-color: #e0a93d;
+    border: 1px solid lightgray;
+}
+
+.sidebar .nav-link {
+    color: #422D2B;
+    font-size: 1.1rem;
+    padding: 15px;
+    border-left: 4px solid transparent;
+    border-bottom: 1px solid #ddd;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: white;
+    color: #e0a93d;
+    border-left: 4px solid #f39632;
+}
+
+.content {
+    padding: 20px;
+}
+
+.menu-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.menu-card-image {
+    width: 220px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+
+/* Style for top navigation on small screens */
+@media (max-width: 767px) {
+    .sidebar {
+        display: flex;
+        justify-content: space-around;
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+    }
+
+    .sidebar .nav-link {
+        padding: 10px;
+        border-right: 1px solid #ddd;
+    }
+
+    .content {
+        padding-top: 80px;
+    }
+}
+
+/* Style for vertical sidebar on large screens */
+@media (min-width: 768px) {
+    .sidebar {
+        display: block;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+}
